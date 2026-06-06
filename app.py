@@ -89,33 +89,21 @@ if st.button("▶ 开始合成", use_container_width=True):
                     volume=volume,
                 )
                 audio = synthesizer.call(text)
-                st.session_state["last_audio"] = audio
-                st.session_state["last_text"] = text
-                st.session_state["last_speed"] = speed
+                audio_size = len(audio) / 1024
+
+                st.markdown("---")
+                st.markdown("<h3 style='color:#c9a0dc'>🔊 合成结果</h3>", unsafe_allow_html=True)
+                st.markdown(f"<div class='audio-box'>"
+                    f"<span class='pill'>语速 {speed}x</span>"
+                    f"<span class='pill'>{len(text)} 字</span>"
+                    f"<span class='pill'>{audio_size:.0f} KB</span>"
+                    f"</div>", unsafe_allow_html=True)
+                st.audio(audio, format="audio/mp3")
+                st.download_button("📥 下载到手机", data=audio, file_name="玉玉的声音.mp3",
+                    mime="audio/mpeg", use_container_width=True)
                 st.toast("合成完成！", icon="✅")
-                st.rerun()
             except Exception as e:
                 st.error(f"合成失败：{e}")
-
-# ====== 合成结果 ======
-if st.session_state.get("last_audio") and st.session_state.get("last_text"):
-    st.markdown("---")
-    st.markdown("<h3 style='color:#c9a0dc'>🔊 合成结果</h3>", unsafe_allow_html=True)
-
-    audio_data = st.session_state["last_audio"]
-    audio_text = st.session_state["last_text"]
-    audio_size = len(audio_data) / 1024
-    last_speed = st.session_state.get("last_speed", 1.0)
-
-    st.markdown(f"<div class='audio-box'>"
-        f"<span class='pill'>语速 {last_speed}x</span>"
-        f"<span class='pill'>{len(audio_text)} 字</span>"
-        f"<span class='pill'>{audio_size:.0f} KB</span>"
-        f"</div>", unsafe_allow_html=True)
-
-    st.audio(audio_data, format="audio/mp3")
-    st.download_button("📥 下载到手机", data=audio_data, file_name="玉玉的声音.mp3",
-        mime="audio/mpeg", use_container_width=True)
 
 # ====== 使用说明 ======
 with st.expander("📖 使用说明"):
