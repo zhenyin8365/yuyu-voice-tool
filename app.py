@@ -80,7 +80,8 @@ if st.button("▶ 开始合成", use_container_width=True):
     else:
         with st.spinner("正在合成中，请稍候..."):
             try:
-                os.environ["DASHSCOPE_API_KEY"] = api_key.strip()
+                import dashscope
+                dashscope.api_key = api_key.strip()
                 from dashscope.audio.tts_v2 import SpeechSynthesizer
                 synthesizer = SpeechSynthesizer(
                     model="cosyvoice-v3.5-plus",
