@@ -45,7 +45,11 @@ text = st.text_area("输入要合成的文字", height=180,
     max_chars=2000)
 st.caption(f"{len(text)} / 2000 字")
 
-speed = st.select_slider("语速", options=[0.8, 1.0, 1.2, 1.3, 1.5], value=1.0)
+col_s1, col_s2 = st.columns(2)
+with col_s1:
+    speed = st.select_slider("语速", options=[0.8, 1.0, 1.2, 1.3, 1.5], value=1.0)
+with col_s2:
+    volume = st.slider("音量", min_value=0, max_value=100, value=80)
 
 if st.button("▶ 开始合成", use_container_width=True):
     if not api_key.strip():
@@ -63,6 +67,7 @@ if st.button("▶ 开始合成", use_container_width=True):
                     model="cosyvoice-v3.5-plus",
                     voice=voice_id.strip(),
                     speech_rate=speed,
+                    volume=volume,
                 )
                 audio = synthesizer.call(text)
                 st.session_state["last_audio"] = audio
