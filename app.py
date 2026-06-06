@@ -80,20 +80,32 @@ if st.button("▶ 开始合成", use_container_width=True):
     else:
         with st.spinner("正在合成中，请稍候..."):
             try:
-                os.environ["DASHSCOPE_API_KEY"] = api_key.strip()
-                from dashscope.audio.tts_v2 import SpeechSynthesizer
-                import dashscope
-                dashscope.api_key = api_key.strip()
-                synthesizer = SpeechSynthesizer(
-                    model="cosyvoice-v3.5-plus",
-                    voice=voice_id.strip(),
-                    speech_rate=speed,
-                    volume=volume,
+                import requests
+
+                resp = requests.post(
+                    "https://dashscope.aliyuncs.com/api/v1/services/audio/tts/speech-synthesizer",
+                    headers={
+                        "Authorization": f"Bearer {api_key.strip()}",
+                        "Content-Type": "application/json",
+                    },
+                    json={
+                        "model": "cosyvoice-v3.5-plus",
+                        "input": {"text": text},
+                        "parameters": {
+                            "voice": voice_id.strip(),
+                            "speech_rate": speed,
+                            "volume": volume,
+                        },
+                    },
+                    timeout=60,
                 )
-                audio = synthesizer.call(text)
-                if not audio:
-                    st.error("合成返回空结果，请检查 API-Key 和音色ID 是否正确。")
+
+                if resp.status_code != 200:
+                    st.error(f"合成失败：HTTP {resp.status_code} - {resp.text[:200]}")
                 else:
+                    audio = resp.content
+                    audio_size = len(audio) / 1024
+                if resp.status_code == 200:
                     audio_size = len(audio) / 1024
                     st.markdown("---")
                     st.markdown("<h3 style='color:#c9a0dc'>🔊 合成结果</h3>", unsafe_allow_html=True)
