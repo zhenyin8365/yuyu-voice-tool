@@ -1,13 +1,19 @@
 """
 玉玉的声音工坊 — AI语音合成工具
+
+部署前配置：修改下方两行，填入客户的 API-Key 和音色ID
 """
 
 import streamlit as st
 import os
 
-# ====== 润锋配置区（帮客户填好之后重新部署即可）======
-DEFAULT_API_KEY = ""
-DEFAULT_VOICE_ID = ""
+# ============================================================
+#  润锋配置区：把下面两个空字符串替换为实际值，然后重新部署
+#  修改完直接提交 GitHub，Streamlit Cloud 会自动更新
+# ============================================================
+DEFAULT_API_KEY = ""   # 客户的阿里云百炼 API-Key（sk- 开头）
+DEFAULT_VOICE_ID = ""  # 客户的声音复刻音色ID（cosyvoice- 开头）
+# ============================================================
 
 st.set_page_config(page_title="玉玉的声音工坊", page_icon="🎤", layout="centered")
 
@@ -51,25 +57,21 @@ with col2:
 if synth_btn:
     if not text.strip():
         st.error("请先输入要合成的文字。")
-    elif not DEFAULT_API_KEY and not st.session_state.get("api_key"):
-        st.error("未配置 API-Key，请联系润锋。")
-    elif not DEFAULT_VOICE_ID and not st.session_state.get("voice_id"):
-        st.error("未配置音色ID，请联系润锋复刻声音。")
+    elif not DEFAULT_API_KEY:
+        st.error("未配置 API-Key，请联系润锋 13307871670。")
+    elif not DEFAULT_VOICE_ID:
+        st.error("未配置音色ID，请联系润锋 13307871670。")
     else:
         with st.spinner("正在合成中，请稍候..."):
             try:
-                api_key = DEFAULT_API_KEY or st.session_state.get("api_key", "")
-                voice_id = DEFAULT_VOICE_ID or st.session_state.get("voice_id", "")
-                os.environ["DASHSCOPE_API_KEY"] = api_key
-
+                os.environ["DASHSCOPE_API_KEY"] = DEFAULT_API_KEY
                 from dashscope.audio.tts_v2 import SpeechSynthesizer
                 synthesizer = SpeechSynthesizer(
                     model="cosyvoice-v3.5-plus",
-                    voice=voice_id,
+                    voice=DEFAULT_VOICE_ID,
                     speech_rate=speed,
                 )
                 audio = synthesizer.call(text)
-
                 st.session_state["last_audio"] = audio
                 st.session_state["last_text"] = text
                 st.toast("合成完成！", icon="✅")
@@ -97,18 +99,16 @@ if st.session_state.get("last_audio") and st.session_state.get("last_text"):
 
 # ====== 使用说明 ======
 with st.expander("📖 使用说明"):
-    st.markdown("""
-    **怎么用：**
-    1. 在上方输入你想说的话
-    2. 选择合适的语速
-    3. 点击「开始合成」
-    4. 试听满意后点「下载到手机」
-
-    **关于你的声音：**
-    你的专属声音已经预先训练好了，输入任何文字都会用你的声音朗读。
-
-    如遇到合成失败或任何问题，请联系 **润锋 13307871670**。
-    """)
+    st.markdown("**怎么用**")
+    st.markdown("1. 在上方输入你想说的话")
+    st.markdown("2. 选择合适的语速")
+    st.markdown("3. 点击「开始合成」")
+    st.markdown("4. 试听满意后点「下载到手机」")
+    st.markdown("")
+    st.markdown("**关于你的声音**")
+    st.markdown("你的专属声音已经预先训练好了，输入任何文字都会用你的声音朗读出来。")
+    st.markdown("")
+    st.markdown("如遇到合成失败或任何问题，请联系 **润锋 13307871670**。")
 
 # ====== Footer ======
 st.markdown("---")
