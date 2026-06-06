@@ -1,10 +1,13 @@
 """
 玉玉的声音工坊 — AI语音合成工具
-客户用自己的阿里云百炼 API-Key 和复刻音色ID，输入文字即可合成语音并下载。
 """
 
 import streamlit as st
 import os
+
+# ====== 润锋配置区（帮客户填好之后重新部署即可）======
+DEFAULT_API_KEY = ""
+DEFAULT_VOICE_ID = ""
 
 st.set_page_config(page_title="玉玉的声音工坊", page_icon="🎤", layout="centered")
 
@@ -16,7 +19,6 @@ st.markdown("""
     padding: 12px 24px !important; font-weight: 700 !important; width: 100%;
 }
 .stButton>button:hover { background: linear-gradient(135deg, #9b4dff, #b76eff) !important; }
-a { color: #c0a0f0 !important; }
 .audio-box {
     background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
     border-radius: 14px; padding: 20px; text-align: center; margin: 16px 0;
@@ -29,58 +31,13 @@ a { color: #c0a0f0 !important; }
 """, unsafe_allow_html=True)
 
 st.markdown("<h1 style='color:#e0b0ff;text-align:center'>🎤 玉玉的声音工坊</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align:center;color:#b8a9d4;margin-bottom:30px'>专属你的AI语音合成 · 三步搞定</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center;color:#b8a9d4;margin-bottom:30px'>输入文字，用你的专属声音合成语音</p>", unsafe_allow_html=True)
 
-# ====== Step 1: API Key ======
-with st.expander("🔑 第一步：获取 API-Key", expanded=not st.session_state.get("step1_done")):
-    st.markdown("""
-    去阿里云百炼控制台获取 API-Key：
+# ====== 语音合成 ======
+st.markdown("<h3 style='color:#c9a0dc'>📝 输入文字</h3>", unsafe_allow_html=True)
 
-    1. 点下方按钮打开百炼控制台
-    2. 登录阿里云账号（没有就注册一个）
-    3. 右上角点击头像 → **API-KEY** → 创建新的 → 复制
-    """)
-    st.link_button("去百炼控制台获取 API-Key", "https://bailian.console.aliyun.com/?tab=api", use_container_width=True)
-
-    api_key = st.text_input("粘贴 API-Key", key="api_key_input",
-        value=st.session_state.get("api_key", ""),
-        placeholder="sk-xxxxxxxxxxxxxxxx",
-        type="password")
-    if api_key.strip():
-        st.session_state["api_key"] = api_key.strip()
-        st.session_state["step1_done"] = True
-
-if st.session_state.get("api_key"):
-    st.success("API-Key 已设置")
-
-# ====== Step 2: Voice Clone ======
-with st.expander("🎙️ 第二步：复刻你的声音", expanded=not st.session_state.get("step2_done")):
-    st.markdown("""
-    **声音复刻（一次性操作，建议在电脑上完成）：**
-
-    方式一：手机录好音，把录音发到电脑上，用下方按钮打开复刻页面上传。
-    方式二：直接在电脑麦克风前录 10-20 秒讲话。
-
-    复刻完成后，把生成的 **音色ID** 粘贴回来。之后就能随时在手机上合成了。
-    """)
-    st.link_button("去复刻我的声音（百炼控制台）", "https://bailian.console.aliyun.com/cn-beijing#/efm/model_experience_center/voice?currentTab=voiceTts&secondary=clone&primary=cloning", use_container_width=True)
-
-    voice_id = st.text_input("粘贴音色ID", key="voice_id_input",
-        value=st.session_state.get("voice_id", ""),
-        placeholder="例如 cosyvoice-v3.5-plus-bailian-abc123def4567890")
-    if voice_id.strip():
-        st.session_state["voice_id"] = voice_id.strip()
-        st.session_state["step2_done"] = True
-
-if st.session_state.get("voice_id"):
-    st.success(f"音色ID 已设置 · {st.session_state['voice_id'][:50]}...")
-
-# ====== Step 3: Synthesize ======
-st.markdown("---")
-st.markdown("<h3 style='color:#c9a0dc'>📝 第三步：语音合成</h3>", unsafe_allow_html=True)
-
-text = st.text_area("输入要合成的文字", key="synth_text", height=150,
-    placeholder="在这里输入文字，比如：大家好，我是玉玉，欢迎来到我的声音工坊...",
+text = st.text_area("要合成的文字", key="synth_text", height=180,
+    placeholder="在这里输入你想说的话，比如：大家好，我是玉玉，欢迎来到我的声音工坊...",
     max_chars=2000)
 st.caption(f"{len(text)} / 2000 字")
 
@@ -94,19 +51,21 @@ with col2:
 if synth_btn:
     if not text.strip():
         st.error("请先输入要合成的文字。")
-    elif not st.session_state.get("api_key"):
-        st.error("请先在第一步设置 API-Key。")
-    elif not st.session_state.get("voice_id"):
-        st.error("请先在第二步设置音色ID。")
+    elif not DEFAULT_API_KEY and not st.session_state.get("api_key"):
+        st.error("未配置 API-Key，请联系润锋。")
+    elif not DEFAULT_VOICE_ID and not st.session_state.get("voice_id"):
+        st.error("未配置音色ID，请联系润锋复刻声音。")
     else:
         with st.spinner("正在合成中，请稍候..."):
             try:
-                os.environ["DASHSCOPE_API_KEY"] = st.session_state["api_key"]
-                from dashscope.audio.tts_v2 import SpeechSynthesizer
+                api_key = DEFAULT_API_KEY or st.session_state.get("api_key", "")
+                voice_id = DEFAULT_VOICE_ID or st.session_state.get("voice_id", "")
+                os.environ["DASHSCOPE_API_KEY"] = api_key
 
+                from dashscope.audio.tts_v2 import SpeechSynthesizer
                 synthesizer = SpeechSynthesizer(
                     model="cosyvoice-v3.5-plus",
-                    voice=st.session_state["voice_id"],
+                    voice=voice_id,
                     speech_rate=speed,
                 )
                 audio = synthesizer.call(text)
@@ -117,7 +76,7 @@ if synth_btn:
             except Exception as e:
                 st.error(f"合成失败：{e}")
 
-# ====== Result ======
+# ====== 合成结果 ======
 if st.session_state.get("last_audio") and st.session_state.get("last_text"):
     st.markdown("---")
     st.markdown("<h3 style='color:#c9a0dc'>🔊 合成结果</h3>", unsafe_allow_html=True)
@@ -133,14 +92,23 @@ if st.session_state.get("last_audio") and st.session_state.get("last_text"):
         f"</div>", unsafe_allow_html=True)
 
     st.audio(audio_data, format="audio/mp3")
+    st.download_button("📥 下载到手机", data=audio_data, file_name="玉玉的声音.mp3",
+        mime="audio/mpeg", use_container_width=True)
 
-    st.download_button(
-        label="📥 下载到手机",
-        data=audio_data,
-        file_name="玉玉的声音.mp3",
-        mime="audio/mpeg",
-        use_container_width=True,
-    )
+# ====== 使用说明 ======
+with st.expander("📖 使用说明"):
+    st.markdown("""
+    **怎么用：**
+    1. 在上方输入你想说的话
+    2. 选择合适的语速
+    3. 点击「开始合成」
+    4. 试听满意后点「下载到手机」
+
+    **关于你的声音：**
+    你的专属声音已经预先训练好了，输入任何文字都会用你的声音朗读。
+
+    如遇到合成失败或任何问题，请联系 **润锋 13307871670**。
+    """)
 
 # ====== Footer ======
 st.markdown("---")
