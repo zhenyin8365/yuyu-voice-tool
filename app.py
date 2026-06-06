@@ -68,6 +68,7 @@ if st.button("▶ 开始合成", use_container_width=True):
                 st.session_state["last_audio"] = audio
                 st.session_state["last_text"] = text
                 st.toast("合成完成！", icon="✅")
+                st.rerun()
             except Exception as e:
                 st.error(f"合成失败：{e}")
 
