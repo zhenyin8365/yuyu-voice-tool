@@ -67,6 +67,7 @@ if st.button("▶ 开始合成", use_container_width=True):
                 audio = synthesizer.call(text)
                 st.session_state["last_audio"] = audio
                 st.session_state["last_text"] = text
+                st.session_state["last_speed"] = speed
                 st.toast("合成完成！", icon="✅")
                 st.rerun()
             except Exception as e:
@@ -80,9 +81,10 @@ if st.session_state.get("last_audio") and st.session_state.get("last_text"):
     audio_data = st.session_state["last_audio"]
     audio_text = st.session_state["last_text"]
     audio_size = len(audio_data) / 1024
+    last_speed = st.session_state.get("last_speed", 1.0)
 
     st.markdown(f"<div class='audio-box'>"
-        f"<span class='pill'>语速 {speed}x</span>"
+        f"<span class='pill'>语速 {last_speed}x</span>"
         f"<span class='pill'>{len(audio_text)} 字</span>"
         f"<span class='pill'>{audio_size:.0f} KB</span>"
         f"</div>", unsafe_allow_html=True)
