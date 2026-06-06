@@ -80,9 +80,10 @@ if st.button("▶ 开始合成", use_container_width=True):
     else:
         with st.spinner("正在合成中，请稍候..."):
             try:
+                os.environ["DASHSCOPE_API_KEY"] = api_key.strip()
+                from dashscope.audio.tts_v2 import SpeechSynthesizer
                 import dashscope
                 dashscope.api_key = api_key.strip()
-                from dashscope.audio.tts_v2 import SpeechSynthesizer
                 synthesizer = SpeechSynthesizer(
                     model="cosyvoice-v3.5-plus",
                     voice=voice_id.strip(),
@@ -90,19 +91,21 @@ if st.button("▶ 开始合成", use_container_width=True):
                     volume=volume,
                 )
                 audio = synthesizer.call(text)
-                audio_size = len(audio) / 1024
-
-                st.markdown("---")
-                st.markdown("<h3 style='color:#c9a0dc'>🔊 合成结果</h3>", unsafe_allow_html=True)
-                st.markdown(f"<div class='audio-box'>"
-                    f"<span class='pill'>语速 {speed}x</span>"
-                    f"<span class='pill'>{len(text)} 字</span>"
-                    f"<span class='pill'>{audio_size:.0f} KB</span>"
-                    f"</div>", unsafe_allow_html=True)
-                st.audio(audio, format="audio/mp3")
-                st.download_button("📥 下载到手机", data=audio, file_name="玉玉的声音.mp3",
-                    mime="audio/mpeg", use_container_width=True)
-                st.toast("合成完成！", icon="✅")
+                if not audio:
+                    st.error("合成返回空结果，请检查 API-Key 和音色ID 是否正确。")
+                else:
+                    audio_size = len(audio) / 1024
+                    st.markdown("---")
+                    st.markdown("<h3 style='color:#c9a0dc'>🔊 合成结果</h3>", unsafe_allow_html=True)
+                    st.markdown(f"<div class='audio-box'>"
+                        f"<span class='pill'>语速 {speed}x</span>"
+                        f"<span class='pill'>{len(text)} 字</span>"
+                        f"<span class='pill'>{audio_size:.0f} KB</span>"
+                        f"</div>", unsafe_allow_html=True)
+                    st.audio(audio, format="audio/mp3")
+                    st.download_button("📥 下载到手机", data=audio, file_name="玉玉的声音.mp3",
+                        mime="audio/mpeg", use_container_width=True)
+                    st.toast("合成完成！", icon="✅")
             except Exception as e:
                 st.error(f"合成失败：{e}")
 
