@@ -1,21 +1,19 @@
 """
 玉玉的声音工坊 — AI语音合成工具
-
-部署前配置：修改下方两行，填入客户的 API-Key 和音色ID
 """
 
 import streamlit as st
 import os
 
-# ============================================================
-#  润锋配置区：把下面两个空字符串替换为实际值，然后重新部署
-#  修改完直接提交 GitHub，Streamlit Cloud 会自动更新
-# ============================================================
-DEFAULT_API_KEY = ""   # 客户的阿里云百炼 API-Key（sk- 开头）
-DEFAULT_VOICE_ID = ""  # 客户的声音复刻音色ID（cosyvoice- 开头）
-# ============================================================
-
 st.set_page_config(page_title="玉玉的声音工坊", page_icon="🎤", layout="centered")
+
+# ====== 从 URL 读取已保存的配置 ======
+try:
+    params = st.query_params
+except Exception:
+    params = {}
+saved_key = params.get("key", "") if isinstance(params.get("key"), str) else ""
+saved_voice = params.get("voice", "") if isinstance(params.get("voice"), str) else ""
 
 st.markdown("""
 <style>
@@ -39,6 +37,29 @@ st.markdown("""
 st.markdown("<h1 style='color:#e0b0ff;text-align:center'>🎤 玉玉的声音工坊</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align:center;color:#b8a9d4;margin-bottom:30px'>输入文字，用你的专属声音合成语音</p>", unsafe_allow_html=True)
 
+# ====== 配置区（折叠，填一次即可）======
+with st.expander("⚙️ 配置（仅需填写一次）", expanded=not saved_key):
+    st.caption("填好后点「保存配置」，会把信息存到链接里。下次打开自动生效，无需重复填写。")
+    col_a, col_b = st.columns(2)
+    with col_a:
+        api_key = st.text_input("API-Key", key="cfg_key", value=saved_key,
+            type="password", placeholder="sk-xxxxxxxxxxxxxxxx")
+    with col_b:
+        voice_id = st.text_input("音色ID", key="cfg_voice", value=saved_voice,
+            placeholder="cosyvoice-v3.5-plus-bailian-xxxxxxxx")
+
+    if st.button("💾 保存配置", use_container_width=True):
+        if api_key.strip() and voice_id.strip():
+            st.query_params["key"] = api_key.strip()
+            st.query_params["voice"] = voice_id.strip()
+            st.rerun()
+        else:
+            st.error("请填写完整的 API-Key 和音色ID。")
+
+if not saved_key or not saved_voice:
+    st.info("请先在上方填写 API-Key 和音色ID，点「保存配置」。填一次即可，之后不用再填。")
+    st.stop()
+
 # ====== 语音合成 ======
 st.markdown("<h3 style='color:#c9a0dc'>📝 输入文字</h3>", unsafe_allow_html=True)
 
@@ -57,18 +78,14 @@ with col2:
 if synth_btn:
     if not text.strip():
         st.error("请先输入要合成的文字。")
-    elif not DEFAULT_API_KEY:
-        st.error("未配置 API-Key，请联系润锋 13307871670。")
-    elif not DEFAULT_VOICE_ID:
-        st.error("未配置音色ID，请联系润锋 13307871670。")
     else:
         with st.spinner("正在合成中，请稍候..."):
             try:
-                os.environ["DASHSCOPE_API_KEY"] = DEFAULT_API_KEY
+                os.environ["DASHSCOPE_API_KEY"] = saved_key
                 from dashscope.audio.tts_v2 import SpeechSynthesizer
                 synthesizer = SpeechSynthesizer(
                     model="cosyvoice-v3.5-plus",
-                    voice=DEFAULT_VOICE_ID,
+                    voice=saved_voice,
                     speech_rate=speed,
                 )
                 audio = synthesizer.call(text)
