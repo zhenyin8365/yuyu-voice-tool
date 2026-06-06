@@ -83,16 +83,19 @@ if st.button("▶ 开始合成", use_container_width=True):
                 import requests
 
                 resp = requests.post(
-                    "https://dashscope.aliyuncs.com/api/v1/services/audio/tts/speech-synthesizer",
+                    "https://dashscope.aliyuncs.com/api/v1/services/audio/tts/SpeechSynthesizer",
                     headers={
                         "Authorization": f"Bearer {api_key.strip()}",
                         "Content-Type": "application/json",
                     },
                     json={
                         "model": "cosyvoice-v3.5-plus",
-                        "input": {"text": text},
-                        "parameters": {
+                        "input": {
+                            "text": text,
                             "voice": voice_id.strip(),
+                            "format": "mp3",
+                        },
+                        "parameters": {
                             "speech_rate": speed,
                             "volume": volume,
                         },
@@ -103,21 +106,25 @@ if st.button("▶ 开始合成", use_container_width=True):
                 if resp.status_code != 200:
                     st.error(f"合成失败：HTTP {resp.status_code} - {resp.text[:200]}")
                 else:
-                    audio = resp.content
-                    audio_size = len(audio) / 1024
-                if resp.status_code == 200:
-                    audio_size = len(audio) / 1024
-                    st.markdown("---")
-                    st.markdown("<h3 style='color:#c9a0dc'>🔊 合成结果</h3>", unsafe_allow_html=True)
-                    st.markdown(f"<div class='audio-box'>"
-                        f"<span class='pill'>语速 {speed}x</span>"
-                        f"<span class='pill'>{len(text)} 字</span>"
-                        f"<span class='pill'>{audio_size:.0f} KB</span>"
-                        f"</div>", unsafe_allow_html=True)
-                    st.audio(audio, format="audio/mp3")
-                    st.download_button("📥 下载到手机", data=audio, file_name="玉玉的声音.mp3",
-                        mime="audio/mpeg", use_container_width=True)
-                    st.toast("合成完成！", icon="✅")
+                    result = resp.json()
+                    audio_url = result.get("output", {}).get("audio", {}).get("url", "")
+                    if not audio_url:
+                        st.error(f"未获取到音频链接：{resp.text[:200]}")
+                    else:
+                        audio_resp = requests.get(audio_url, timeout=30)
+                        audio = audio_resp.content
+                        audio_size = len(audio) / 1024
+                        st.markdown("---")
+                        st.markdown("<h3 style='color:#c9a0dc'>🔊 合成结果</h3>", unsafe_allow_html=True)
+                        st.markdown(f"<div class='audio-box'>"
+                            f"<span class='pill'>语速 {speed}x</span>"
+                            f"<span class='pill'>{len(text)} 字</span>"
+                            f"<span class='pill'>{audio_size:.0f} KB</span>"
+                            f"</div>", unsafe_allow_html=True)
+                        st.audio(audio, format="audio/mp3")
+                        st.download_button("📥 下载到手机", data=audio, file_name="玉玉的声音.mp3",
+                            mime="audio/mpeg", use_container_width=True)
+                        st.toast("合成完成！", icon="✅")
             except Exception as e:
                 st.error(f"合成失败：{e}")
 
