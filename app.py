@@ -41,9 +41,9 @@ with st.expander("⚙️ 第一步：配置", expanded=True):
 st.markdown("<h3 style='color:#c9a0dc'>📝 第二步：语音合成</h3>", unsafe_allow_html=True)
 
 text = st.text_area("输入要合成的文字", height=180,
+    value=st.session_state.get("template_text", ""),
     placeholder="在这里输入你想说的话，或者点击下方模板快速填充...",
-    max_chars=2000,
-    key="synth_text_area")
+    max_chars=2000)
 st.caption(f"{len(text)} / 2000 字")
 
 # 快捷模板
@@ -61,7 +61,7 @@ cols = st.columns(4)
 for i, (label, sample) in enumerate(templates.items()):
     with cols[i % 4]:
         if st.button(label, key=f"tmpl_{i}", use_container_width=True):
-            st.session_state["synth_text_area"] = sample
+            st.session_state["template_text"] = sample
             st.rerun()
 
 col_s1, col_s2 = st.columns(2)
