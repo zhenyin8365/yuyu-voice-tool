@@ -41,9 +41,28 @@ with st.expander("⚙️ 第一步：配置", expanded=True):
 st.markdown("<h3 style='color:#c9a0dc'>📝 第二步：语音合成</h3>", unsafe_allow_html=True)
 
 text = st.text_area("输入要合成的文字", height=180,
-    placeholder="在这里输入你想说的话，比如：大家好，我是玉玉，欢迎来到我的声音工坊...",
-    max_chars=2000)
+    placeholder="在这里输入你想说的话，或者点击下方模板快速填充...",
+    max_chars=2000,
+    key="synth_text_area")
 st.caption(f"{len(text)} / 2000 字")
+
+# 快捷模板
+st.caption("💡 快捷模板（点击自动填入）：")
+templates = {
+    "📞 电话客服": "您好，感谢您的来电。我是您的专属客服，请问有什么可以帮您的？",
+    "💬 陪伴闲聊": "今天天气真好，心情也跟着好了起来。有时候简单的事情，就能让人开心一整天。",
+    "🛍️ 产品介绍": "欢迎了解我们的新产品，它采用最新技术，简约设计，操作简单，非常适合日常使用。",
+    "💼 品牌宣传": "专注品质，用心服务。我们始终坚持以客户为中心，为您提供最优质的产品和体验。",
+    "🎉 节日祝福": "祝您节日快乐，身体健康，家庭幸福！感谢您一直以来的支持与信任。",
+    "📱 日常问候": "早上好！新的一天开始了，愿你今天心情美好，工作顺利，生活愉快。",
+    "🎙️ 自我介绍": "大家好，我是玉玉，欢迎来到我的声音工坊。这里可以用我的专属声音朗读任何文字。",
+}
+cols = st.columns(4)
+for i, (label, sample) in enumerate(templates.items()):
+    with cols[i % 4]:
+        if st.button(label, key=f"tmpl_{i}", use_container_width=True):
+            st.session_state["synth_text_area"] = sample
+            st.rerun()
 
 col_s1, col_s2 = st.columns(2)
 with col_s1:
