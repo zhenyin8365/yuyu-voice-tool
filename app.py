@@ -10,32 +10,36 @@ st.set_page_config(page_title="玉玉的声音工坊", page_icon="🎤", layout=
 
 st.markdown("""
 <style>
-html, body, .stApp { background: linear-gradient(175deg, #0f0c29, #302b63, #24243e) !important; color: #f0e6ff; }
-h1 { color: #e0b0ff !important; font-size: 2rem !important; text-align: center; }
-h3 { color: #c9a0dc !important; }
-.stButton>button { background: linear-gradient(135deg, #7b2ff7, #9b4dff) !important; color: white !important; border: none !important; border-radius: 12px !important; padding: 12px 24px !important; font-weight: 700 !important; width: 100%; }
+.stButton>button {
+    background: linear-gradient(135deg, #7b2ff7, #9b4dff) !important;
+    color: white !important; border: none !important; border-radius: 12px !important;
+    padding: 12px 24px !important; font-weight: 700 !important; width: 100%;
+}
 .stButton>button:hover { background: linear-gradient(135deg, #9b4dff, #b76eff) !important; }
-.stTextInput>div>div>input, .stTextArea>div>div>textarea { background: rgba(255,255,255,.08) !important; color: #f0e6ff !important; border: 1px solid rgba(255,255,255,.15) !important; border-radius: 10px !important; }
-.stExpander { background: rgba(255,255,255,.03) !important; border: 1px solid rgba(255,255,255,.1) !important; border-radius: 14px !important; }
-a { color: #c9a0dc !important; }
-.audio-box { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: 14px; padding: 20px; text-align: center; margin: 16px 0; }
-.pill { display: inline-block; background: rgba(123,47,247,.2); color: #c9a0dc; border-radius: 20px; padding: 4px 14px; font-size: 13px; font-weight: 600; margin: 4px; }
+a { color: #c0a0f0 !important; }
+.audio-box {
+    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
+    border-radius: 14px; padding: 20px; text-align: center; margin: 16px 0;
+}
+.pill {
+    display: inline-block; background: rgba(123,47,247,.2); color: #c9a0dc;
+    border-radius: 20px; padding: 4px 14px; font-size: 13px; font-weight: 600; margin: 4px;
+}
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1>🎤 玉玉的声音工坊</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='color:#e0b0ff;text-align:center'>🎤 玉玉的声音工坊</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align:center;color:#b8a9d4;margin-bottom:30px'>专属你的AI语音合成 · 三步搞定</p>", unsafe_allow_html=True)
 
 # ====== Step 1: API Key ======
 with st.expander("🔑 第一步：获取 API-Key", expanded=not st.session_state.get("step1_done")):
     st.markdown("""
-    <div style='background:rgba(255,255,255,.04);border-radius:12px;padding:16px;margin-bottom:12px'>
-    <b>去阿里云百炼控制台获取 API-Key：</b><br>
-    1. 点下方按钮打开百炼控制台<br>
-    2. 登录阿里云账号（没有就注册一个）<br>
-    3. 右上角点击头像 → <b>API-KEY</b> → 创建新的 → 复制
-    </div>
-    """, unsafe_allow_html=True)
+    去阿里云百炼控制台获取 API-Key：
+
+    1. 点下方按钮打开百炼控制台
+    2. 登录阿里云账号（没有就注册一个）
+    3. 右上角点击头像 → **API-KEY** → 创建新的 → 复制
+    """)
     st.link_button("去百炼控制台获取 API-Key", "https://bailian.console.aliyun.com/?tab=api", use_container_width=True)
 
     api_key = st.text_input("粘贴 API-Key", key="api_key_input",
@@ -47,19 +51,18 @@ with st.expander("🔑 第一步：获取 API-Key", expanded=not st.session_stat
         st.session_state["step1_done"] = True
 
 if st.session_state.get("api_key"):
-    st.success("API-Key 已设置 ✓")
+    st.success("API-Key 已设置")
 
 # ====== Step 2: Voice Clone ======
 with st.expander("🎙️ 第二步：复刻你的声音", expanded=not st.session_state.get("step2_done")):
     st.markdown("""
-    <div style='background:rgba(255,255,255,.04);border-radius:12px;padding:16px;margin-bottom:12px'>
-    <b>去阿里云百炼复刻你的声音：</b><br>
-    1. 点下方按钮打开声音复刻页面<br>
-    2. 点击 <b>「上传音频」</b>，用手机录一段 10-20 秒的讲话<br>
-    3. 等待 1-2 分钟，复刻完成后复制生成的 <b>音色ID</b><br>
+    去阿里云百炼复刻你的声音：
+
+    1. 点下方按钮打开声音复刻页面
+    2. 点击 **「上传音频」**，用手机录一段 10-20 秒的讲话
+    3. 等待 1-2 分钟，复刻完成后复制生成的 **音色ID**
     4. 粘贴到下方输入框
-    </div>
-    """, unsafe_allow_html=True)
+    """)
     st.link_button("去复刻我的声音", "https://bailian.console.aliyun.com/cn-beijing#/efm/model_experience_center/voice?currentTab=voiceTts&secondary=clone&primary=cloning", use_container_width=True)
 
     voice_id = st.text_input("粘贴音色ID", key="voice_id_input",
@@ -70,11 +73,11 @@ with st.expander("🎙️ 第二步：复刻你的声音", expanded=not st.sessi
         st.session_state["step2_done"] = True
 
 if st.session_state.get("voice_id"):
-    st.success("音色ID 已设置 ✓")
+    st.success("音色ID 已设置")
 
 # ====== Step 3: Synthesize ======
 st.markdown("---")
-st.markdown("<h3>📝 第三步：语音合成</h3>", unsafe_allow_html=True)
+st.markdown("<h3 style='color:#c9a0dc'>📝 第三步：语音合成</h3>", unsafe_allow_html=True)
 
 text = st.text_area("输入要合成的文字", key="synth_text", height=150,
     placeholder="在这里输入文字，比如：大家好，我是玉玉，欢迎来到我的声音工坊...",
@@ -117,7 +120,7 @@ if synth_btn:
 # ====== Result ======
 if st.session_state.get("last_audio") and st.session_state.get("last_text"):
     st.markdown("---")
-    st.markdown("<h3>🔊 合成结果</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color:#c9a0dc'>🔊 合成结果</h3>", unsafe_allow_html=True)
 
     audio_data = st.session_state["last_audio"]
     audio_text = st.session_state["last_text"]
