@@ -39,16 +39,21 @@ st.markdown("<h1 style='color:#e0b0ff;text-align:center'>🎤 玉玉的声音工
 st.markdown("<p style='text-align:center;color:#b8a9d4;margin-bottom:30px'>输入文字，用你的专属声音合成语音</p>", unsafe_allow_html=True)
 
 # ====== 第一步：配置 ======
-with st.expander("⚙️ 第一步：配置", expanded=True):
+with st.expander("⚙️ 第一步：配置", expanded=(not saved_key)):
     col_a, col_b = st.columns(2)
     with col_a:
         api_key = st.text_input("API-Key", type="password", value=saved_key,
-            placeholder="sk-xxxxxxxxxxxxxxxx",
-            help="填好之后点「开始合成」会自动保存，刷新不丢")
+            placeholder="sk-xxxxxxxxxxxxxxxx")
     with col_b:
         voice_id = st.text_input("音色ID", value=saved_voice,
-            placeholder="cosyvoice-v3.5-plus-bailian-xxxxxxxx",
-            help="填好之后点「开始合成」会自动保存，刷新不丢")
+            placeholder="cosyvoice-v3.5-plus-bailian-xxxxxxxx")
+    if st.button("💾 保存配置", use_container_width=True):
+        if api_key.strip() and voice_id.strip():
+            st.query_params["key"] = api_key.strip()
+            st.query_params["voice"] = voice_id.strip()
+            st.rerun()
+        else:
+            st.error("请填写完整的 API-Key 和音色ID。")
 
 # ====== 第二步：合成 ======
 st.markdown("<h3 style='color:#c9a0dc'>📝 第二步：语音合成</h3>", unsafe_allow_html=True)
@@ -138,8 +143,6 @@ if st.button("▶ 开始合成", use_container_width=True):
                         st.download_button("📥 下载到手机", data=audio, file_name="玉玉的声音.mp3",
                             mime="audio/mpeg", use_container_width=True)
                         st.toast("合成完成！", icon="✅")
-                        st.query_params["key"] = api_key.strip()
-                        st.query_params["voice"] = voice_id.strip()
             except Exception as e:
                 st.error(f"合成失败：{e}")
 
