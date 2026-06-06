@@ -67,7 +67,7 @@ with st.expander("🎙️ 第二步：复刻你的声音", expanded=not st.sessi
 
     voice_id = st.text_input("粘贴音色ID", key="voice_id_input",
         value=st.session_state.get("voice_id", ""),
-        placeholder="例如 cosyvoice-v3.5-plus-bailian-32f1fb97d3534c8ea2b7ba257b214b33")
+        placeholder="例如 cosyvoice-v3.5-plus-bailian-abc123def4567890")
     if voice_id.strip():
         st.session_state["voice_id"] = voice_id.strip()
         st.session_state["step2_done"] = True
