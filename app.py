@@ -302,6 +302,7 @@ if st.button("▶ 开始合成", use_container_width=True):
                         st.audio(audio, format="audio/mp3")
                         st.download_button("📥 下载到手机", data=audio, file_name="玉玉的声音.mp3",
                             mime="audio/mpeg", use_container_width=True)
+                        st.warning("⚠️ 音频不会自动保存！刷新页面、切走页面或关闭浏览器后音频就会消失，请马上点上方按钮下载到手机。")
                         st.toast("合成完成！", icon="✅")
             except Exception as e:
                 st.error(f"合成失败：{e}")
