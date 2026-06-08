@@ -136,9 +136,22 @@ text = st.text_area("输入要合成的文字", height=180,
     placeholder="在这里输入你想说的话，或点击上方 AI 按钮自动生成，或点击下方模板快速填充。",
     max_chars=2000)
 
-tc1, tc2 = st.columns(2)
+st.caption("⏱️ 字数参考（点击自动裁剪到相应时长）：")
+dur_cols = st.columns(4)
+durations = {"30秒 ≈ 80字": 80, "60秒 ≈ 160字": 160, "120秒 ≈ 320字": 320, "180秒 ≈ 500字": 500}
+for i, (label, max_chars) in enumerate(durations.items()):
+    with dur_cols[i]:
+        if st.button(label, key=f"dur_{i}", use_container_width=True):
+            current_text = st.session_state.get("template_text", "")
+            if len(current_text) > max_chars:
+                st.session_state["template_text"] = current_text[:max_chars]
+                st.rerun()
+            else:
+                st.toast(f"当前文案 {len(current_text)} 字，未超过 {label} 限制", icon="ℹ️")
+
+tc1, tc2 = st.columns([1.5, 1])
 with tc1:
-    st.caption(f"{len(text)} / 2000 字")
+    st.caption(f"当前 {len(text)} / 2000 字")
 with tc2:
     polish_clicked = st.button("✨ 去广润色", key="polish", use_container_width=True,
         help="把营销文案转为纯讲解风格，去掉硬广和推销话术")
