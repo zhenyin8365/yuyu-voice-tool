@@ -136,18 +136,51 @@ text = st.text_area("输入要合成的文字", height=180,
     placeholder="在这里输入你想说的话，或点击上方 AI 按钮自动生成，或点击下方模板快速填充。",
     max_chars=2000)
 
-st.caption("⏱️ 字数参考（点击自动裁剪到相应时长）：")
+st.caption("⏱️ AI智能调整字数（根据已有文案扩写或精简）：")
 dur_cols = st.columns(4)
 durations = {"30秒 ≈ 80字": 80, "60秒 ≈ 160字": 160, "120秒 ≈ 320字": 320, "180秒 ≈ 500字": 500}
-for i, (label, max_chars) in enumerate(durations.items()):
+for i, (label, target_chars) in enumerate(durations.items()):
     with dur_cols[i]:
         if st.button(label, key=f"dur_{i}", use_container_width=True):
             current_text = st.session_state.get("template_text", "")
-            if len(current_text) > max_chars:
-                st.session_state["template_text"] = current_text[:max_chars]
-                st.rerun()
+            if not current_text.strip():
+                st.error("请先生成或输入文案。")
             else:
-                st.toast(f"当前文案 {len(current_text)} 字，未超过 {label} 限制", icon="ℹ️")
+                if len(current_text) > target_chars:
+                    action = f"精简到{target_chars}字"
+                    prompt = f"请将以下文案精简到{target_chars}字左右，保留核心信息和卖点，去掉重复和啰嗦的内容。直接输出精简后的文案，不要任何解释：\n\n{current_text}"
+                else:
+                    action = f"扩写到{target_chars}字"
+                    prompt = f"请将以下文案扩写到{target_chars}字左右，补充细节、场景描述和自然过渡，保持原有风格和核心信息不变。直接输出扩写后的文案，不要任何解释：\n\n{current_text}"
+                with st.spinner(f"AI 正在{action}..."):
+                    try:
+                        import requests as req3
+                        import json as _json5
+                        ai_payload = {
+                            "model": "agnes-2.0-flash",
+                            "messages": [
+                                {"role": "system", "content": "你是一个专业的短视频口播文案写手。根据用户要求精简或扩写文案，保持原有风格和信息。严格遵守抖音内容规范，不使用任何营销话术、医疗术语和效果承诺。直接输出文案，不要任何解释。"},
+                                {"role": "user", "content": prompt},
+                            ],
+                            "max_tokens": 800,
+                        }
+                        ai_resp = req3.post(
+                            "https://apihub.agnes-ai.com/v1/chat/completions",
+                            headers={
+                                "Authorization": f"Bearer {AGNES_KEY}",
+                                "Content-Type": "application/json; charset=utf-8",
+                            },
+                            data=_json5.dumps(ai_payload, ensure_ascii=False).encode("utf-8"),
+                            timeout=45,
+                        )
+                        if ai_resp.status_code == 200:
+                            result_text = ai_resp.json()["choices"][0]["message"]["content"].strip()
+                            st.session_state["template_text"] = result_text
+                            st.rerun()
+                        else:
+                            st.error(f"AI 调整失败：{ai_resp.text[:150]}")
+                    except Exception as e:
+                        st.error(f"AI 调整失败：{e}")
 
 tc1, tc2 = st.columns([1.5, 1])
 with tc1:
