@@ -8,6 +8,8 @@ import os
 st.set_page_config(page_title="玉玉的声音工坊", page_icon="🎤", layout="centered")
 
 AGNES_KEY = "sk-SfAuFKTIGg8WCkhwRYgVZGhSNazYLgrSbI4dYWrSBsM2RrCK"
+DASHSCOPE_KEY = "sk-dcc85bb0578847979a0e5e28f6336bd2"
+Yuyu_VOICE_ID = "cosyvoice-v3.5-plus-bailian-d4f813c6e8024eb69e99fc6c875e0135"
 
 POLISH_PROMPT = """你是一位经验丰富的皮肤护理顾问，不是销售。你只负责客观、中立地向客户介绍护理项目本身的情况，不做任何推销、说服或引导购买的行为。
 
@@ -137,14 +139,18 @@ st.markdown("<h1 style='color:#e0b0ff;text-align:center'>🎤 玉玉的声音工
 st.markdown("<p style='text-align:center;color:#b8a9d4;margin-bottom:30px'>输入文字，用你的专属声音合成语音</p>", unsafe_allow_html=True)
 
 # ====== 第一步：配置 ======
-with st.expander("⚙️ 第一步：配置", expanded=(not saved_key)):
+with st.expander("⚙️ 第一步：配置（已预设，无需修改）", expanded=False):
     col_a, col_b = st.columns(2)
     with col_a:
-        api_key = st.text_input("API-Key", type="password", value=saved_key,
-            placeholder="sk-xxxxxxxxxxxxxxxx")
+        api_key = st.text_input("API-Key", type="password",
+            value=saved_key or DASHSCOPE_KEY,
+            placeholder="已预设",
+            help="已预设玉玉专属Key，无需修改")
     with col_b:
-        voice_id = st.text_input("音色ID", value=saved_voice,
-            placeholder="cosyvoice-v3.5-plus-bailian-xxxxxxxx")
+        voice_id = st.text_input("音色ID",
+            value=saved_voice or Yuyu_VOICE_ID,
+            placeholder="已预设",
+            help="已预设玉玉专属音色，无需修改")
     if st.button("💾 保存配置", use_container_width=True):
         if api_key.strip() and voice_id.strip():
             st.query_params["key"] = api_key.strip()
